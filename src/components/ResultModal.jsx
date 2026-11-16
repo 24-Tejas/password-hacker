@@ -109,7 +109,9 @@ export default function ResultModal({
 
           <div className="metric-cell">
             <span className="metric-label">TIME</span>
-            <span className="metric-value">{formatDuration(gameState.elapsedSeconds)}</span>
+            <span className="metric-value">
+              {formatDuration(isWon ? Math.max(1, gameState.elapsedSeconds) : gameState.elapsedSeconds)}
+            </span>
           </div>
 
           {isWon && scoreInfo && (

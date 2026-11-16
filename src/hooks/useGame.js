@@ -177,13 +177,14 @@ export function useGame() {
     }
   }, [gameState, setStoredDailyGame, setStoredPracticeGame]);
 
-  // Timer: increment elapsed seconds while game is in progress
+  // Timer: begins ticking only after entering the first word
   useEffect(() => {
     if (gameState.status !== GAME_STATUS.IN_PROGRESS) return;
+    if (gameState.guesses.length === 0) return; // Wait until first word is entered
 
     const timer = setInterval(() => {
       setGameState((prev) => {
-        if (prev.status !== GAME_STATUS.IN_PROGRESS) return prev;
+        if (prev.status !== GAME_STATUS.IN_PROGRESS || prev.guesses.length === 0) return prev;
         return {
           ...prev,
           elapsedSeconds: (prev.elapsedSeconds || 0) + 1,
@@ -192,7 +193,7 @@ export function useGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameState.status]);
+  }, [gameState.status, gameState.guesses.length]);
 
   // Toast trigger helper
   const showToast = useCallback((msg) => {
@@ -328,10 +329,11 @@ export function useGame() {
         // Update stats
         const finalAttempts = currentRow + 1;
         const currentStats = gameState.mode === 'DAILY' ? dailyStats : practiceStats;
+        const finalElapsed = Math.max(1, gameState.elapsedSeconds);
         const updatedStats = recordGameStats(currentStats, {
           won: true,
           attempts: finalAttempts,
-          elapsedSeconds: gameState.elapsedSeconds,
+          elapsedSeconds: finalElapsed,
           date: currentUtcDate,
         });
 
@@ -418,7 +420,7 @@ export function useGame() {
     const streak = gameState.mode === 'DAILY' ? dailyStats.currentStreak : practiceStats.currentStreak;
     return calculateScore({
       attempts: gameState.guesses.length,
-      elapsedSeconds: gameState.elapsedSeconds,
+      elapsedSeconds: Math.max(1, gameState.elapsedSeconds),
       streak,
     });
   }, [gameState.status, gameState.guesses.length, gameState.elapsedSeconds, gameState.mode, dailyStats.currentStreak, practiceStats.currentStreak]);
