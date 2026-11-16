@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTimeUntilNextUtcMidnight, formatDuration, formatMissionTag } from '../utils/dateUtils.js';
-import { shareGameResult } from '../utils/shareUtils.js';
+import { shareImageResult, generateShareText } from '../utils/shareUtils.js';
+import { generateResultImage } from '../utils/imageShareUtils.js';
 import { MAX_ATTEMPTS } from '../game/feedback.js';
 import { GAME_STATUS } from '../game/gameEngine.js';
 
@@ -8,14 +9,14 @@ export default function ResultModal({
   isOpen,
   onClose,
   gameState,
-  scoreInfo,
   onSwitchMode,
   onNewPractice,
   onOpenStats,
   showToast,
 }) {
   const [countdown, setCountdown] = useState(getTimeUntilNextUtcMidnight().formatted);
-  const [copied, setCopied] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -23,6 +24,30 @@ export default function ResultModal({
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Pre-generate image preview when modal opens
+  useEffect(() => {
+    if (isOpen && gameState.status !== GAME_STATUS.IN_PROGRESS) {
+      const isDaily = gameState.mode === 'DAILY';
+      const missionTag = isDaily
+        ? formatMissionTag(gameState.missionNumber)
+        : `SIM-${gameState.missionNumber}`;
+
+      generateResultImage({
+        mode: gameState.mode,
+        missionTag,
+        won: gameState.status === GAME_STATUS.WON,
+        attempts: gameState.guesses.length,
+        maxAttempts: MAX_ATTEMPTS,
+        guesses: gameState.guesses,
+        evaluations: gameState.evaluations,
+        secret: gameState.secret,
+        elapsedSeconds: Math.max(1, gameState.elapsedSeconds),
+      }).then((res) => {
+        setImagePreviewUrl(res.dataUrl);
+      }).catch(() => {});
+    }
+  }, [isOpen, gameState]);
 
   if (!isOpen || gameState.status === GAME_STATUS.IN_PROGRESS) return null;
 
@@ -33,24 +58,41 @@ export default function ResultModal({
     ? formatMissionTag(gameState.missionNumber)
     : `SIM-${gameState.missionNumber}`;
 
-  const handleShare = async () => {
-    const res = await shareGameResult({
-      isDaily,
-      missionTag,
-      won: isWon,
-      attempts: attemptsUsed,
-      maxAttempts: MAX_ATTEMPTS,
-      evaluations: gameState.evaluations,
-      elapsedSeconds: gameState.elapsedSeconds,
-      score: scoreInfo?.totalScore,
-    });
+  const handleShareImage = async () => {
+    setIsGeneratingImage(true);
+    try {
+      const { file, dataUrl } = await generateResultImage({
+        mode: gameState.mode,
+        missionTag,
+        won: isWon,
+        attempts: attemptsUsed,
+        maxAttempts: MAX_ATTEMPTS,
+        guesses: gameState.guesses,
+        evaluations: gameState.evaluations,
+        secret: gameState.secret,
+        elapsedSeconds: Math.max(1, gameState.elapsedSeconds),
+      });
 
-    if (res.method === 'clipboard') {
-      setCopied(true);
-      showToast('RESULTS COPIED TO CLIPBOARD');
-      setTimeout(() => setCopied(false), 2500);
-    } else if (res.method === 'share') {
-      showToast('SHARED SUCCESSFULLY');
+      const shareText = generateShareText({
+        isDaily,
+        missionTag,
+        won: isWon,
+        attempts: attemptsUsed,
+        maxAttempts: MAX_ATTEMPTS,
+        evaluations: gameState.evaluations,
+        elapsedSeconds: gameState.elapsedSeconds,
+      });
+
+      const res = await shareImageResult(file, dataUrl, shareText);
+      if (res.method === 'share') {
+        showToast('IMAGE SHARED VIA SYSTEM DIALOG');
+      } else if (res.method === 'download') {
+        showToast('IMAGE SAVED & SUMMARY COPIED');
+      }
+    } catch {
+      showToast('UNABLE TO EXPORT IMAGE');
+    } finally {
+      setIsGeneratingImage(false);
     }
   };
 
@@ -86,7 +128,7 @@ export default function ResultModal({
           </div>
         </div>
 
-        {/* Next Try Countdown Callout */}
+        {/* 12:00 AM Countdown Callout */}
         {isDaily ? (
           <div className="countdown-callout-box">
             <span className="countdown-callout-label">NEXT PASSWORD AT 12:00 AM:</span>
@@ -99,7 +141,7 @@ export default function ResultModal({
           </div>
         )}
 
-        {/* Performance Metrics Grid */}
+        {/* Performance Metrics (Attempts & Time) */}
         <div className="result-metrics-grid">
           <div className="metric-cell">
             <span className="metric-label">ATTEMPTS</span>
@@ -114,44 +156,29 @@ export default function ResultModal({
               {formatDuration(isWon ? Math.max(1, gameState.elapsedSeconds) : gameState.elapsedSeconds)}
             </span>
           </div>
-
-          {isWon && scoreInfo && (
-            <>
-              <div className="metric-cell highlight-score">
-                <span className="metric-label">SCORE</span>
-                <span className="metric-value">{scoreInfo.totalScore.toLocaleString()}</span>
-              </div>
-
-              <div className="metric-cell">
-                <span className="metric-label">RANK</span>
-                <span className="metric-value grade-badge">{scoreInfo.grade}</span>
-              </div>
-            </>
-          )}
         </div>
 
-        {/* Visual Share Preview */}
-        <div className="share-matrix-preview" aria-hidden="true">
-          {gameState.evaluations.map((row, rIdx) => (
-            <div key={rIdx} className="share-preview-row">
-              {row.map((status, cIdx) => (
-                <span
-                  key={cIdx}
-                  className={`preview-chip chip-${status}`}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+        {/* Steps Image Card Preview */}
+        {imagePreviewUrl && (
+          <div className="share-image-preview-container">
+            <div className="preview-header-label">YOUR DECRYPTION STEPS (SHAREABLE IMAGE):</div>
+            <img
+              src={imagePreviewUrl}
+              alt="Decryption Steps Summary Card"
+              className="share-result-image-preview"
+            />
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="modal-actions-group">
           <button
             type="button"
             className="clean-btn clean-btn-primary share-btn"
-            onClick={handleShare}
+            onClick={handleShareImage}
+            disabled={isGeneratingImage}
           >
-            {copied ? '✓ COPIED TO CLIPBOARD' : 'SHARE RESULT ↗'}
+            {isGeneratingImage ? 'GENERATING IMAGE...' : '📤 SHARE IMAGE & STEPS'}
           </button>
 
           {onOpenStats && (

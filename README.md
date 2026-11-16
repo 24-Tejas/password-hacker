@@ -1,9 +1,9 @@
-# ⚡ PASSWORD HACKER
+# 🔐 PASSWORD CRACKER
 
 > **Addictive daily code-breaking puzzle game inspired by Wordle and Mastermind.**  
-> Infiltrate the mainframe, crack the 5-character cipher in 6 attempts, and climb the operative rankings.
+> Crack the secret 5-letter access password in 6 attempts with soothing eye-friendly aesthetics, instant feedback, haptic typing, and shareable decryption image cards.
 
-![Password Hacker Banner](https://img.shields.io/badge/SECURITY-ALPHA--5%20PROTOCOL-00ff66?style=for-the-badge&logo=target)
+![Password Cracker](https://img.shields.io/badge/PASSWORD-CRACKER-538d4e?style=for-the-badge&logo=target)
 ![React 19](https://img.shields.io/badge/React-19.3.1-61dafb?style=for-the-badge&logo=react)
 ![Vite 8](https://img.shields.io/badge/Vite-8.3.6-646cff?style=for-the-badge&logo=vite)
 ![Zero Backend](https://img.shields.io/badge/Backend-100%25%20Client--Side-00f0ff?style=for-the-badge)
@@ -12,91 +12,92 @@
 
 ## 🎮 Gameplay Rules
 
-1. **Target Cipher**: Contains exactly **5 characters**.
-2. **Valid Characters**: Uppercase alphanumeric `A–Z` and `0–9` (36 possible symbols).
-3. **No Duplicate Characters**: Every character in the secret access code is completely unique.
-4. **Attempts**: Players receive **6 attempts** per session.
-5. **Feedback Telemetry**:
-   - 🟩 **GREEN**: Correct character in the exact position.
-   - 🟨 **YELLOW**: Correct character in the code, but in a different position.
-   - ⬛ **GREY**: Character does not exist anywhere in the access code.
-6. **Victory**: Decrypt all 5 characters within 6 attempts (`ACCESS GRANTED`).
-7. **Defeat**: Exhaust all 6 attempts without cracking the code (`ACCESS DENIED`).
+1. **Target Cipher**: Exactly **5 letters** (`A–Z` only, no numbers).
+2. **Attempts**: Players receive **6 attempts** per session.
+3. **Timer Starts on First Guess**: The timer begins ticking only after you submit your first word.
+4. **Feedback Telemetry (Wordle 2-pass logic)**:
+   - 🟩 **GREEN**: Correct letter in the exact position.
+   - 🟨 **YELLOW**: Correct letter, but in a different position.
+   - ⬜ **GREY**: Letter does not exist anywhere in the secret password.
+5. **Victory**: Decrypt all 5 positions within 6 attempts (`PASSWORD CRACKED SUCCESSFULLY!`).
+6. **Defeat**: Exhaust all 6 attempts without deciphering (`ACCESS DENIED`).
 
 ---
 
 ## 🕹 Game Modes
 
 ### 1. ✦ Daily Challenge
-- One synchronized puzzle generated globally per UTC calendar day.
-- Fully deterministic seeded pseudorandom generation derived from the UTC date (`YYYY-MM-DD`).
+- One synchronized puzzle per calendar day.
+- Deterministic seeded pseudorandom generation derived from the date.
+- Next daily puzzle unlocks every night at **12:00 AM midnight**.
 - Refreshing the browser preserves your active guesses, time, and state.
 - Tracks daily win streaks, attempt distribution, and records in `localStorage`.
-- Live countdown timer to the next UTC midnight release.
+- Live countdown timer to the next 12:00 AM unlock.
 
 ### 2. ↺ Practice Simulator
-- Unlimited practice games with freshly randomized unique codes.
+- Unlimited practice games with freshly randomized 5-letter words.
 - Practice drills never modify your official Daily Challenge streaks or statistics.
-- Instant "New Cipher" button for continuous gameplay.
+- Instant "New Word" button for continuous gameplay.
 
 ---
 
-## 🎨 Visual & Audio Experience
+## 🎨 UI & Features
 
-- **Cyberpunk Terminal Aesthetic**: Deep charcoal background, phosphor neon green, cyan, and cyber amber accents.
-- **Synthesized Web Audio Engine**: Zero external audio files or network requests. Synthesizes mechanical key taps, card flip chimes, warning buzzers, and victory arpeggios directly using the Web Audio API.
-- **Tile Decryption Flip Animations**: Staggered 3D card flips that reveal feedback sequentially.
-- **Terminal Diagnostics Stream**: Retro auto-scrolling system diagnostics and breach telemetry.
-- **CRT Scanline Matrix**: Realistic phosphor CRT raster lines with user toggle in Settings.
-- **Wordle-Style Share Generator**: Native Web Share API with automatic clipboard fallback and emoji grid.
+- **Soothing Light Theme**: Clean eye-friendly palette (`#f8fafc` canvas, `#ffffff` cards, `#e2e8f0` borders) with authentic Wordle tile colors (`#538d4e`, `#b59f3b`, `#787c7e`).
+- **Tactile Mobile Haptics**: Subtle vibration feedback when tapping keys (`navigator.vibrate`), backspacing, or submitting on mobile devices.
+- **Visual Image Sharing**: Exports high-resolution PNG image cards showing your complete decryption steps, tile colors, target word, attempts, time, and statistics via native Web Share API or direct download.
+- **Synthesized Web Audio Engine**: Procedurally generates mechanical key clicks, tile flip chords, alert buzzers, and victory arpeggios via the Web Audio API without external audio files.
+- **Responsive Layout**: Engineered and tested for mobile devices (down to 320px screen width), tablets, and desktop displays.
 
 ---
 
 ## 📁 Project Architecture
 
 ```
-password-hacker/
+password-cracker/
 ├── public/
 │   └── favicon.svg
 ├── src/
 │   ├── components/
-│   │   ├── CharacterCell.jsx       # 3D flip card cell with status glow
-│   │   ├── CyberToast.jsx          # Holographic HUD alert notifications
-│   │   ├── GameKeyboard.jsx        # 4-row virtual alphanumeric keyboard
-│   │   ├── Header.jsx              # Brand header, mode switcher, action buttons
+│   │   ├── CharacterCell.jsx       # Tile cell with flip animation & status colors
+│   │   ├── CyberToast.jsx          # Non-intrusive alert toasts
+│   │   ├── GameKeyboard.jsx        # 3-row QWERTY keyboard with tactile haptics
+│   │   ├── Header.jsx              # Brand header, mode switcher, mobile stats button
 │   │   ├── HowToPlayModal.jsx      # Rules manual with visual color examples
-│   │   ├── MissionPanel.jsx        # Target protocol, attempts pips, timer
+│   │   ├── MissionPanel.jsx        # Target challenge, attempts pips, timer
 │   │   ├── PasswordGrid.jsx        # 6x5 attempt decryption grid
-│   │   ├── ResultModal.jsx         # Access Granted/Denied, scores, share
+│   │   ├── ResultModal.jsx         # Cracked/Denied banner, countdown, steps image share
 │   │   ├── SettingsModal.jsx       # Sound, scanlines, animations, shortcuts
 │   │   ├── StatisticsModal.jsx     # Win %, streaks, attempt distribution chart
-│   │   └── TerminalLog.jsx         # Scrolling system telemetry stream
+│   │   └── TerminalLog.jsx         # System telemetry stream (no page jumping)
 │   │
 │   ├── game/
-│   │   ├── dailyGenerator.js       # Seeded deterministic daily cipher PRNG
-│   │   ├── feedback.js             # Pure 2-pass Mastermind feedback algorithm
+│   │   ├── dailyGenerator.js       # Seeded deterministic daily word PRNG
+│   │   ├── feedback.js             # Pure 2-pass Wordle feedback algorithm
 │   │   ├── gameEngine.js           # Pure game state transitions & keyboard map
 │   │   ├── scoring.js              # Score calculation & telemetry metrics
-│   │   └── soundEngine.js          # Web Audio API procedural sound synthesizer
+│   │   ├── soundEngine.js          # Web Audio procedural sound synthesizer
+│   │   └── words.js                # Curated 5-letter tech and dictionary word list
 │   │
 │   ├── hooks/
-│   │   ├── useGame.js              # Central game orchestrator hook
+│   │   ├── useGame.js              # Central game orchestrator hook with haptics
 │   │   └── useLocalStorage.js      # Resilient localStorage persistence hook
 │   │
 │   ├── utils/
-│   │   ├── dateUtils.js            # UTC date and midnight countdown calculations
-│   │   └── shareUtils.js           # Emoji matrix generator & Web Share API
+│   │   ├── dateUtils.js            # Midnight countdown calculations & formatting
+│   │   ├── imageShareUtils.js      # High-res canvas image generation with steps
+│   │   └── shareUtils.js           # Native Web Share API with image file sharing
 │   │
 │   ├── styles/
 │   │   ├── global.css              # Variables, resets, typography
-│   │   └── game.css                # Complete responsive cyberpunk stylesheet
+│   │   └── game.css                # Complete responsive stylesheet
 │   │
 │   ├── App.jsx                     # Root application view
 │   ├── index.css                   # Stylesheet imports
 │   └── main.jsx                    # React 19 entry point
 │
 ├── test-suite.js                   # Automated test suite (17 edge-case tests)
-├── index.html                      # HTML5 template with Google fonts
+├── index.html                      # HTML5 template with light theme meta
 ├── package.json                    # Project dependencies and npm scripts
 └── vite.config.js                  # Vite bundler configuration
 ```
@@ -111,13 +112,10 @@ password-hacker/
 
 ### Installation
 ```bash
-# 1. Clone or navigate to the project directory
-cd password-hacker
-
-# 2. Install dependencies
+# 1. Install dependencies
 npm install
 
-# 3. Start local development server
+# 2. Start local development server
 npm run dev
 ```
 
@@ -138,48 +136,27 @@ The optimized static build will be output to the `dist/` directory.
 
 ## 🌐 Deployment Instructions
 
-`PASSWORD HACKER` is a 100% client-side Single Page Application (SPA). It requires zero server runtimes, databases, or API keys.
+`PASSWORD CRACKER` is a 100% client-side Single Page Application (SPA). It requires zero server runtimes, databases, or API keys.
 
 ### Deploying to Vercel
 
 #### Method 1: Using the Vercel CLI
 ```bash
-npm install -g vercel
-vercel
+npx vercel
+```
+For production redeployments:
+```bash
+npx vercel --prod
 ```
 
 #### Method 2: Git Integration via Vercel Dashboard
-1. Push your repository to GitHub / GitLab / Bitbucket.
+1. Push your repository to GitHub.
 2. In the [Vercel Dashboard](https://vercel.com), click **Add New Project** and import the repository.
 3. Configure settings:
    - **Framework Preset**: `Vite`
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
-4. Click **Deploy**.
-
----
-
-### Deploying to Netlify
-
-#### Method 1: Using Netlify CLI
-```bash
-npm install -g netlify-cli
-netlify deploy --prod --dir=dist
-```
-
-#### Method 2: Git Integration via Netlify Dashboard
-1. Connect your Git repository in [Netlify](https://app.netlify.com).
-2. Set build settings:
-   - **Base directory**: (leave blank or `./`)
-   - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-3. Click **Deploy site**.
-
-#### Client-side Routing Note (`_redirects`)
-To support any direct SPA route rewrites on Netlify, an optional `public/_redirects` file can contain:
-```
-/*    /index.html   200
-```
+4. Click **Deploy**. Any future `git push` to your GitHub branch will automatically trigger a new Vercel deployment!
 
 ---
 

@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 
 export default function TerminalLog({ logs = [] }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const logEndRef = useRef(null);
+  const terminalBodyRef = useRef(null);
 
-  // Auto-scroll to bottom on new log item
+  // Auto-scroll inside terminal container ONLY (never scrolls the window)
   useEffect(() => {
-    if (!isCollapsed && logEndRef.current) {
-      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (!isCollapsed && terminalBodyRef.current) {
+      terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
     }
   }, [logs, isCollapsed]);
 
@@ -33,7 +33,7 @@ export default function TerminalLog({ logs = [] }) {
       </div>
 
       {!isCollapsed && (
-        <div className="terminal-body" tabIndex={0}>
+        <div className="terminal-body" ref={terminalBodyRef} tabIndex={0}>
           <div className="terminal-log-list">
             {logs.map((log) => (
               <div key={log.id} className={`terminal-line log-${log.type}`}>
@@ -46,7 +46,6 @@ export default function TerminalLog({ logs = [] }) {
               <span className="cursor-prompt">&gt;</span>
               <span className="blinking-cursor">_</span>
             </div>
-            <div ref={logEndRef} />
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 /**
- * PASSWORD HACKER - Share Utilities
- * Formats Wordle-style emoji grids and handles Web Share API / clipboard fallbacks.
+ * PASSWORD CRACKER - Share Utilities
+ * Formats Wordle-style text/emoji grids, handles Web Share API with images and clipboard fallbacks.
  */
 
 import { formatDuration } from './dateUtils.js';
@@ -13,17 +13,6 @@ const EMOJI_MAP = {
 
 /**
  * Generates the shareable result text.
- *
- * @param {object} params
- * @param {boolean} params.isDaily
- * @param {number|string} params.missionTag - e.g. "#042" or "PRAC-72"
- * @param {boolean} params.won
- * @param {number} params.attempts
- * @param {number} params.maxAttempts
- * @param {Array<Array<'correct'|'misplaced'|'wrong'>>} params.evaluations
- * @param {number} params.elapsedSeconds
- * @param {number} [params.score]
- * @returns {string}
  */
 export function generateShareText({
   isDaily,
@@ -33,46 +22,35 @@ export function generateShareText({
   maxAttempts = 6,
   evaluations = [],
   elapsedSeconds,
-  score,
 }) {
   const title = isDaily
-    ? `PASSWORD HACKER ${missionTag}`
-    : `PASSWORD HACKER [PRACTICE ${missionTag}]`;
+    ? `PASSWORD CRACKER ${missionTag}`
+    : `PASSWORD CRACKER [PRACTICE ${missionTag}]`;
 
   const statusLine = won
-    ? `Security Breached in ${attempts}/${maxAttempts} attempts (${formatDuration(elapsedSeconds)})`
-    : `Breach Aborted (${maxAttempts}/${maxAttempts} attempts exhausted)`;
-
-  const scoreLine = won && score ? `Hack Score: ${score.toLocaleString()} PTS` : '';
+    ? `Cracked in ${attempts}/${maxAttempts} attempts (${formatDuration(elapsedSeconds)})`
+    : `Attempts exhausted (${maxAttempts}/${maxAttempts})`;
 
   // Generate grid rows
   const gridLines = evaluations
     .map((row) => row.map((status) => EMOJI_MAP[status] || '⬛').join(''))
     .join('\n');
 
-  const shareParts = [title, statusLine];
-  if (scoreLine) shareParts.push(scoreLine);
-  shareParts.push('', gridLines);
-
+  const shareParts = [title, statusLine, '', gridLines];
   return shareParts.join('\n');
 }
 
 /**
- * Copies plain text to clipboard with modern and fallback methods.
- * @param {string} text
- * @returns {Promise<boolean>}
+ * Copies plain text to clipboard.
  */
 export async function copyToClipboard(text) {
   if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch {
-      // Fall through to textarea execCommand fallback
-    }
+    } catch {}
   }
 
-  // Fallback for older browsers or non-HTTPS contexts
   try {
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -91,30 +69,45 @@ export async function copyToClipboard(text) {
 }
 
 /**
- * Shares the game results using Web Share API or falls back to clipboard.
- *
- * @param {object} gameData - Params for generateShareText
- * @returns {Promise<{ success: boolean, method: 'share' | 'clipboard' | 'none' }>}
+ * Triggers direct browser download of a dataURL image.
  */
-export async function shareGameResult(gameData) {
-  const shareText = generateShareText(gameData);
+export function downloadImage(dataUrl, filename = 'password-cracker-result.png') {
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 
-  if (typeof navigator !== 'undefined' && navigator.share) {
+/**
+ * Shares the game results image via Web Share API or downloads it.
+ */
+export async function shareImageResult(file, dataUrl, text = '') {
+  // If native Web Share supports files (e.g. mobile Chrome/Safari)
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.canShare &&
+    navigator.canShare({ files: [file] })
+  ) {
     try {
       await navigator.share({
-        title: 'PASSWORD HACKER',
-        text: shareText,
+        title: 'PASSWORD CRACKER',
+        text: text || 'Can you crack today’s password? Play at PASSWORD CRACKER!',
+        files: [file],
       });
       return { success: true, method: 'share' };
     } catch (err) {
       if (err.name === 'AbortError') {
-        // User cancelled share dialog, not an error
         return { success: false, method: 'none' };
       }
-      // If native share threw other error, try clipboard fallback
     }
   }
 
-  const copied = await copyToClipboard(shareText);
-  return { success: copied, method: copied ? 'clipboard' : 'none' };
+  // Fallback: download the image directly and copy text
+  downloadImage(dataUrl, file.name);
+  if (text) {
+    await copyToClipboard(text);
+  }
+  return { success: true, method: 'download' };
 }

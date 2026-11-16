@@ -216,6 +216,15 @@ export function useGame() {
     return buildKeyboardStatus(gameState.guesses, gameState.evaluations);
   }, [gameState.guesses, gameState.evaluations]);
 
+  // Light tactile haptic feedback for mobile devices
+  const triggerHaptic = useCallback((pattern = 12) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {}
+    }
+  }, []);
+
   // Character typing
   const handleTypeChar = useCallback((char) => {
     if (gameState.status !== GAME_STATUS.IN_PROGRESS || revealingRowIndex !== -1) {
@@ -225,16 +234,18 @@ export function useGame() {
     const check = canAppendChar(char, gameState.currentDraft);
     if (!check.allowed) {
       sound.playError();
+      triggerHaptic([20, 30, 20]);
       showToast(check.reason);
       return;
     }
 
+    triggerHaptic(12);
     sound.playKey(char);
     setGameState((prev) => ({
       ...prev,
       currentDraft: (prev.currentDraft + char.toUpperCase()).slice(0, CODE_LENGTH),
     }));
-  }, [gameState.status, gameState.currentDraft, revealingRowIndex, showToast]);
+  }, [gameState.status, gameState.currentDraft, revealingRowIndex, showToast, triggerHaptic]);
 
   // Backspace
   const handleBackspace = useCallback(() => {
@@ -242,13 +253,14 @@ export function useGame() {
       return;
     }
     if (gameState.currentDraft.length > 0) {
+      triggerHaptic(18);
       sound.playBackspace();
       setGameState((prev) => ({
         ...prev,
         currentDraft: prev.currentDraft.slice(0, -1),
       }));
     }
-  }, [gameState.status, gameState.currentDraft, revealingRowIndex]);
+  }, [gameState.status, gameState.currentDraft, revealingRowIndex, triggerHaptic]);
 
   // Clear
   const handleClear = useCallback(() => {
@@ -256,13 +268,14 @@ export function useGame() {
       return;
     }
     if (gameState.currentDraft.length > 0) {
+      triggerHaptic(20);
       sound.playBackspace();
       setGameState((prev) => ({
         ...prev,
         currentDraft: '',
       }));
     }
-  }, [gameState.status, gameState.currentDraft, revealingRowIndex]);
+  }, [gameState.status, gameState.currentDraft, revealingRowIndex, triggerHaptic]);
 
   // Submit Guess
   const handleSubmit = useCallback(() => {
@@ -273,6 +286,7 @@ export function useGame() {
     const validation = validateGuess(gameState.currentDraft, gameState.guesses);
     if (!validation.valid) {
       sound.playError();
+      triggerHaptic([25, 35, 25]);
       showToast(validation.error);
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 550);
@@ -280,8 +294,9 @@ export function useGame() {
       return;
     }
 
-    // Play submission sound
+    // Play submission sound and haptic pulse
     sound.playSubmit();
+    triggerHaptic(30);
 
     const submissionResult = processGuessSubmission(gameState);
     if (!submissionResult.success) {
@@ -325,7 +340,7 @@ export function useGame() {
       if (submissionResult.won) {
         sound.playWin();
         addLog('PASSWORD CRACKED SUCCESSFULLY! ACCESS GRANTED.', 'success');
-        showToast('🎉 PASSWORD CRACKED SUCCESSFULLY! Next password unlocks at 12:00 AM midnight.');
+        // Do not show small toast popup before the big modal as requested
 
         // Confetti burst
         try {
@@ -386,6 +401,7 @@ export function useGame() {
     setDailyStats,
     setPracticeStats,
     currentUtcDate,
+    triggerHaptic,
   ]);
 
   // Physical keyboard listener

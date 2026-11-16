@@ -14,7 +14,7 @@ export default function Header({
         <div className="header-brand">
           <span className="brand-lock-icon">🔐</span>
           <h1 className="brand-title">
-            PASSWORD<span className="brand-accent">HACKER</span>
+            PASSWORD<span className="brand-accent">CRACKER</span>
           </h1>
           <div className="system-status-indicator">
             <span className="status-dot"></span>

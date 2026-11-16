@@ -116,7 +116,7 @@ export default function SettingsModal({
         {/* System Info */}
         <div className="settings-footer">
           <div className="version-info">
-            <span>PASSWORD HACKER v1.0.4-PROD</span>
+            <span>PASSWORD CRACKER v1.0.4-PROD</span>
             <span>ENGINE: REACT 19 + VITE + WEB AUDIO</span>
           </div>
         </div>

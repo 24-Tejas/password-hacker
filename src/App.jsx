@@ -28,7 +28,6 @@ export default function App() {
     settings,
     setSettings,
     logs,
-    scoreInfo,
     isResultOpen,
     setIsResultOpen,
     isStatsOpen,
@@ -107,7 +106,6 @@ export default function App() {
         isOpen={isResultOpen}
         onClose={() => setIsResultOpen(false)}
         gameState={gameState}
-        scoreInfo={scoreInfo}
         onSwitchMode={handleSwitchMode}
         onNewPractice={handleNewPracticeGame}
         onOpenStats={() => setIsStatsOpen(true)}
