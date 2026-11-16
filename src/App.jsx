@@ -70,6 +70,7 @@ export default function App() {
           attemptsUsed={gameState.guesses.length}
           elapsedSeconds={gameState.elapsedSeconds}
           onNewPractice={handleNewPracticeGame}
+          onOpenStats={() => setIsStatsOpen(true)}
         />
 
         {/* 6x5 Decryption Grid */}
@@ -109,6 +110,7 @@ export default function App() {
         scoreInfo={scoreInfo}
         onSwitchMode={handleSwitchMode}
         onNewPractice={handleNewPracticeGame}
+        onOpenStats={() => setIsStatsOpen(true)}
         showToast={clearToast}
       />
 

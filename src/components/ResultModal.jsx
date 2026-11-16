@@ -11,6 +11,7 @@ export default function ResultModal({
   scoreInfo,
   onSwitchMode,
   onNewPractice,
+  onOpenStats,
   showToast,
 }) {
   const [countdown, setCountdown] = useState(getTimeUntilNextUtcMidnight().formatted);
@@ -152,6 +153,19 @@ export default function ResultModal({
           >
             {copied ? '✓ COPIED TO CLIPBOARD' : 'SHARE RESULT ↗'}
           </button>
+
+          {onOpenStats && (
+            <button
+              type="button"
+              className="clean-btn clean-btn-secondary"
+              onClick={() => {
+                onClose();
+                onOpenStats();
+              }}
+            >
+              📊 VIEW FULL STATISTICS
+            </button>
+          )}
 
           {isDaily && !isWon && (
             <button

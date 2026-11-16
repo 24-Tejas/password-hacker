@@ -8,6 +8,7 @@ export default function MissionPanel({
   attemptsUsed,
   elapsedSeconds,
   onNewPractice,
+  onOpenStats,
 }) {
   const attemptsRemaining = Math.max(0, MAX_ATTEMPTS - attemptsUsed);
 
@@ -58,8 +59,20 @@ export default function MissionPanel({
           </span>
         </div>
 
-        {mode === 'PRACTICE' && (
-          <div className="mission-meta-item practice-action">
+        {/* Quick Actions (Stats & New Practice) */}
+        <div className="mission-meta-item hud-actions-group">
+          {onOpenStats && (
+            <button
+              type="button"
+              className="clean-btn-sm stats-hud-btn"
+              onClick={onOpenStats}
+              title="View Statistics & Streaks"
+            >
+              📊 STATS
+            </button>
+          )}
+
+          {mode === 'PRACTICE' && (
             <button
               type="button"
               className="clean-btn-sm new-practice-btn"
@@ -68,8 +81,8 @@ export default function MissionPanel({
             >
               ↺ NEW WORD
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="mission-description-bar">
