@@ -164,9 +164,20 @@ export function useGame() {
     if (!mountedRef.current) {
       mountedRef.current = true;
       initDailyGame();
-      addLog('CIPHER BREACH TERMINAL READY. ENTER 5-CHAR ALPHANUMERIC ACCESS CODE.', 'success');
+      addLog('CIPHER BREACH TERMINAL READY. ENTER 5-LETTER PASSWORD.', 'success');
     }
   }, [initDailyGame, addLog]);
+
+  // 12:00 AM Midnight Rollover Watcher: auto-unlocks new daily password after midnight
+  useEffect(() => {
+    const midnightInterval = setInterval(() => {
+      const today = getUtcDateString();
+      if (today !== currentUtcDate) {
+        window.location.reload();
+      }
+    }, 5000);
+    return () => clearInterval(midnightInterval);
+  }, [currentUtcDate]);
 
   // Sync gameState back to localStorage
   useEffect(() => {
@@ -314,7 +325,7 @@ export function useGame() {
       if (submissionResult.won) {
         sound.playWin();
         addLog('PASSWORD CRACKED SUCCESSFULLY! ACCESS GRANTED.', 'success');
-        showToast('🎉 PASSWORD CRACKED SUCCESSFULLY! Next try in 24 hours.');
+        showToast('🎉 PASSWORD CRACKED SUCCESSFULLY! Next password unlocks at 12:00 AM midnight.');
 
         // Confetti burst
         try {

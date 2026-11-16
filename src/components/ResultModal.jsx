@@ -88,9 +88,9 @@ export default function ResultModal({
         {/* Next Try Countdown Callout */}
         {isDaily ? (
           <div className="countdown-callout-box">
-            <span className="countdown-callout-label">NEXT DAILY PASSWORD IN:</span>
+            <span className="countdown-callout-label">NEXT PASSWORD AT 12:00 AM:</span>
             <span className="countdown-callout-timer">{countdown}</span>
-            <span className="countdown-callout-note">24-hour synchronized worldwide puzzle cycle</span>
+            <span className="countdown-callout-note">A brand new password unlocks tonight at 12:00 AM midnight</span>
           </div>
         ) : (
           <div className="practice-prompt-box">

@@ -83,7 +83,7 @@ export default function HowToPlayModal({ isOpen, onClose }) {
             <div className="mode-desc-card">
               <div className="mode-desc-title">✦ DAILY CHALLENGE</div>
               <p>
-                A new synchronized password released every 24 hours. Compete with players worldwide and maintain your winning streak!
+                A new synchronized password unlocks every night at 12:00 AM midnight. Compete with players worldwide and maintain your winning streak!
               </p>
             </div>
             <div className="mode-desc-card">
